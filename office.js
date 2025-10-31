@@ -12,16 +12,17 @@ const videosLinks = [
 ].map((file) => "https://vod.infiniteplatform.tv/weybridge/videos_reception/" + file);
 
 // const videosLinks = ["chocolate0.mpd", "chocolate1.mpd", "chocolate2.mpd", "chocolate3.mpd", "chocolate4.mpd",
-// "chocolate5.mpd", "chocolate6.mpd", "chocolate7.mpd", "chocolate8.mpd", "chocolate9.mpd"].map((file) => "https://senza-developer.s3.amazonaws.com/streams/chocolate/" + file);
+// "chocolate5.mpd", "chocolate6.mpd", "chocolate7.mpd", "chocolate8.mpd", "chocolate9.mpd"]
+//   .map((file) => "https://senza-developer.s3.amazonaws.com/streams/chocolate/" + file);
 
 const random = true;
-const delay = 3.0;
+const delay = 4.0;
 
 window.addEventListener("load", async () => {
   try {
     await senza.init();
 
-    senza.lifecycle.configure({autoBackground: {enabled: false}});
+    senza.lifecycle.configure({autoBackground: {enabled: false, timeout: {playing: false, idle: false}}});
 
     senza.remotePlayer.addEventListener("ended", async () => {
       await playVideo();
@@ -47,14 +48,16 @@ let app = "Office!"
 async function playVideo() {
   image.classList.remove("fadeOut");
   image.classList.add("fadeIn");
-
+  await sleep(delay);
+  
   console.log(app, "Current state is", senza.lifecycle.state);
 
   try {
-    if (senza.lifecycle.state != senza.lifecycle.UiState.FOREGROUND) {
+    while (!["foreground", "inTransitionToForeground"].includes(senza.lifecycle.state)) {
       console.log(app, "Moving to foreground");
       await senza.lifecycle.moveToForeground();
       console.log(app, "Moved to foreground, state is now", senza.lifecycle.state);
+      await sleep(1);
     }
   } catch (error) {
     console.error(app, "error moving to foreground", error);
@@ -63,23 +66,23 @@ async function playVideo() {
   const index = getIndex();
   const url = videosLinks[index];
   
+  await senza.remotePlayer.unload();
+
+
   image.classList.remove("fadeIn");
   image.classList.add("fadeOut");
-  sleep(1);
-  
-  await senza.remotePlayer.unload();
-  sleep(delay);
+  await sleep(1);
   
   try {
-    console.log(app, `Playing video ${index}: ${url}`);
-    console.log(app, `State when trying to play is`, senza.lifecycle.state);
+    console.log(app, "State when trying to play is", senza.lifecycle.state);
     await senza.remotePlayer.load(url);
+    console.log(app, `Playing video ${index}: ${url}`);
     await senza.remotePlayer.play();
     await senza.lifecycle.moveToBackground();
-    console.log(app, `Moving to background ${index}: ${url}`);
+    console.log(app, "Moving to background");
   } catch (error) {
     console.error(app, `error in ${senza.lifecycle.state} state`, error);
-    sleep(1);
+    await sleep(1);
     await playVideo();
   }
 }
