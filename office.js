@@ -6,9 +6,9 @@ const videosLinks = [
   "Synamedia-Senza-Teaser-Video/default.mpd",
   "VN-Quortex_Switch_video-for_IBC-2025/default.mpd",
   "VN-Services_video_for_social_media-2024/default.mpd",
-  "VN-Sports_Streaming_-_Kite_-2024/default.mpd",
+  "VN-Sports_Streaming_-_Kite_-2024_3/default.mpd",
   "VN-Video_sports_streaming-2023/default.mpd",
-  "VN-Video_Synamedia_Quortex_Customisation_-2024/default.mpd"
+  "VN-Video_Synamedia_Quortex_Customisation_-2024_2/default.mpd"
 ].map((file) => "https://vod.infiniteplatform.tv/weybridge/videos_reception/" + file);
 
 // const videosLinks = ["chocolate0.mpd", "chocolate1.mpd", "chocolate2.mpd", "chocolate3.mpd", "chocolate4.mpd",
