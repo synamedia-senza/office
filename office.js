@@ -17,12 +17,15 @@ const videosLinks = [
 
 const random = true;
 const delay = 4.0;
+const app = "Office!"
 
 window.addEventListener("load", async () => {
   try {
     await senza.init();
 
-    senza.lifecycle.configure({autoBackground: {enabled: false, timeout: {playing: false, idle: false}}});
+    console.log(app, "Starting");
+
+    senza.lifecycle.configure({autoBackground: {enabled: false}});
 
     senza.remotePlayer.addEventListener("ended", async () => {
       await playVideo();
@@ -43,31 +46,27 @@ document.addEventListener("keydown", async function(event) {
 	event.preventDefault();
 });
 
-let app = "Office!"
-
 async function playVideo() {
-  image.classList.remove("fadeOut");
-  image.classList.add("fadeIn");
-  await sleep(delay);
-  
   console.log(app, "Current state is", senza.lifecycle.state);
 
   try {
-    while (!["foreground", "inTransitionToForeground"].includes(senza.lifecycle.state)) {
+    if (!["foreground", "inTransitionToForeground"].includes(senza.lifecycle.state)) {
       console.log(app, "Moving to foreground");
       await senza.lifecycle.moveToForeground();
       console.log(app, "Moved to foreground, state is now", senza.lifecycle.state);
-      await sleep(1);
     }
   } catch (error) {
     console.error(app, "error moving to foreground", error);
   }
 
+  image.classList.remove("fadeOut");
+  image.classList.add("fadeIn");
+  await sleep(delay);
+
   const index = getIndex();
   const url = videosLinks[index];
   
   await senza.remotePlayer.unload();
-
 
   image.classList.remove("fadeIn");
   image.classList.add("fadeOut");
@@ -82,6 +81,9 @@ async function playVideo() {
     console.log(app, "Moving to background");
   } catch (error) {
     console.error(app, `error in ${senza.lifecycle.state} state`, error);
+    
+    // if the SDK thinks we're in background but the streamer thinks we're in foreground, try moving to background again to sync them?
+    await senza.lifecycle.moveToBackground();
     await sleep(1);
     await playVideo();
   }
