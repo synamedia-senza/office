@@ -23,7 +23,7 @@ window.addEventListener("load", async () => {
   try {
     await senza.init();
 
-    console.log(app, "Starting");
+    console.log(app, "Loading: ", senza.getConnectReason());
 
     senza.lifecycle.configure({autoBackground: {enabled: false}});
 
