@@ -11,10 +11,6 @@ const videosLinks = [
   "VN-Video_Synamedia_Quortex_Customisation_-2024_2/default.mpd"
 ].map((file) => "https://vod.infiniteplatform.tv/weybridge/videos_reception/" + file);
 
-// const videosLinks = ["chocolate0.mpd", "chocolate1.mpd", "chocolate2.mpd", "chocolate3.mpd", "chocolate4.mpd",
-// "chocolate5.mpd", "chocolate6.mpd", "chocolate7.mpd", "chocolate8.mpd", "chocolate9.mpd"]
-//   .map((file) => "https://senza-developer.s3.amazonaws.com/streams/chocolate/" + file);
-
 const random = true;
 const delay = 4.0;
 const app = "Office!"
@@ -23,16 +19,15 @@ window.addEventListener("load", async () => {
   try {
     await senza.init();
 
-    console.log(app, "Loading: ", senza.getConnectReason());
-
     senza.lifecycle.configure({autoBackground: {enabled: false}});
 
-    senza.remotePlayer.addEventListener("ended", async () => {
-      await playVideo();
-    });
-    await playVideo();
-
+    senza.remotePlayer.addEventListener("ended", async () => await playVideo());
+    senza.remotePlayer.addEventListener("error", async () => await playVideo());
     senza.uiReady();
+
+    if (senza.lifecycle.connectReason != senza.lifecycle.ConnectReason.UI_RELEASE) {
+      await playVideo();
+    }
   } catch (error) {
     console.error(error);
   }
@@ -47,13 +42,9 @@ document.addEventListener("keydown", async function(event) {
 });
 
 async function playVideo() {
-  console.log(app, "Current state is", senza.lifecycle.state);
-
   try {
     if (!["foreground", "inTransitionToForeground"].includes(senza.lifecycle.state)) {
-      console.log(app, "Moving to foreground");
       await senza.lifecycle.moveToForeground();
-      console.log(app, "Moved to foreground, state is now", senza.lifecycle.state);
     }
   } catch (error) {
     console.error(app, "error moving to foreground", error);
@@ -73,17 +64,12 @@ async function playVideo() {
   await sleep(1);
   
   try {
-    console.log(app, "State when trying to play is", senza.lifecycle.state);
     await senza.remotePlayer.load(url);
     console.log(app, `Playing video ${index}: ${url}`);
     await senza.remotePlayer.play();
     await senza.lifecycle.moveToBackground();
-    console.log(app, "Moving to background");
   } catch (error) {
     console.error(app, `error in ${senza.lifecycle.state} state`, error);
-    
-    // if the SDK thinks we're in background but the streamer thinks we're in foreground, try moving to background again to sync them?
-    await senza.lifecycle.moveToBackground();
     await sleep(1);
     await playVideo();
   }
