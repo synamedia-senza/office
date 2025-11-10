@@ -1,5 +1,5 @@
 const videosLinks = [
-  "Corporate-Video-IBC-2025/default.mpd",
+  "Corporate-Video-IBC-2025_edited/default.mpd",
   "Gravity_90-sec_video-8RB/default.mpd",
   "Iris-30_second-animation-3V/default.mpd",
   "Synamedia-Senza-Explainer-Video/default.mpd",
